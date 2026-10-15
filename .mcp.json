@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "max-ultra-mcp": {
+      "command": "C:\\Users\\hp\\AppData\\Local\\Autodesk\\3dsMax\\2024 - 64bit\\ENU\\temp\\c6977570-25a6-41b0-b9bb-b3be8101123c\\runtime\\win-x64\\node.exe",
+      "args": [
+        "C:\\Users\\hp\\AppData\\Local\\Autodesk\\3dsMax\\2024 - 64bit\\ENU\\temp\\c6977570-25a6-41b0-b9bb-b3be8101123c\\core\\server.js",
+        "--stdio"
+      ],
+      "env": {
+        "MAX_ULTRA_MCP_TOOL_PROFILE": "archviz",
+        "MAX_ULTRA_MCP_PORT": "47635"
+      }
+    }
+  }
+}
