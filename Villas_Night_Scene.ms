@@ -17,10 +17,10 @@
 -- ======================================================================
 (
 	local nVillas = 5
-	local plotW   = 10.5
+	local plotW   = 9.50
 	local plotD   = 16.0
-	local gf      = 3.60
-	local ff      = 3.40
+	local gf      = 3.40
+	local ff      = 3.30
 	local roofZ   = gf + ff
 
 	local U1m = units.decodeValue "1m"
@@ -81,12 +81,14 @@
 		mt
 	)
 
-	local mStone   = noiseBump (mkMat "Villa_Stone_Beige" (color 226 218 205) 0.85 0.0) 0.02 0.15
-	local mTaupe   = noiseBump (mkMat "Villa_Cladding_Taupe" (color 176 156 143) 0.60 0.0) 0.05 0.05
-	local mTaupeDk = noiseBump (mkMat "Villa_Cladding_Dark" (color 132 114 104) 0.60 0.0) 0.05 0.05
+	local mStone   = noiseBump (mkMat "Villa_Stone_Beige" (color 220 212 200) 0.85 0.0) 0.02 0.15
+	local mPanel   = noiseBump (mkMat "Villa_NamePanel_OffWhite" (color 234 231 224) 0.75 0.0) 0.015 0.08
+	local mTaupe   = noiseBump (mkMat "Villa_Cladding_Taupe" (color 178 160 150) 0.60 0.0) 0.05 0.05
+	local mTaupeDk = noiseBump (mkMat "Villa_Cladding_Dark" (color 148 130 120) 0.60 0.0) 0.05 0.05
 	local mPlaster = noiseBump (mkMat "Villa_Plaster_Light" (color 214 204 192) 0.85 0.0) 0.01 0.10
 	local mWhite   = mkMat "Villa_White" (color 238 236 230) 0.70 0.0
-	local mWood    = woodGrain (mkMat "Villa_Wood_Teak" (color 140 92 55) 0.50 0.0) (color 150 98 58) (color 112 70 40)
+	local mWood    = woodGrain (mkMat "Villa_Wood_Teak_Gate" (color 138 98 64) 0.50 0.0) (color 148 106 68) (color 110 76 48)
+	local mLouver  = woodGrain (mkMat "Villa_Louver_DarkWood" (color 96 72 54) 0.45 0.0) (color 104 78 58) (color 78 58 42)
 	local mAlu     = mkMat "Villa_Alu_DarkGrey" (color 48 48 50) 0.35 0.85
 	local mGlass   = mkGlass "Villa_Glass" (color 120 140 150) 0.80
 	local mRail    = mkGlass "Villa_Balcony_Glass" (color 160 180 185) 0.90
@@ -279,92 +281,121 @@
 	)
 
 	-- ==================================================================
-	--  ONE VILLA  (local plot x 0..plotW, boundary wall at y = 0)
+	--  ONE VILLA  (local plot x 0..plotW, boundary wall front face at y = 0)
+	--  Frontage left -> right, as in the render:
+	--   stone pillar + planter | stone wall with sconce | teak door (2 pull
+	--   bars) | white name panel "Villa 0X" + flower bed | white post |
+	--   teak car gate | stone wall      -- white canopy over door + panel
 	-- ==================================================================
 	fn buildVilla idx = (
-		-- ---------- boundary wall / gates ----------
-		bx 0.00 0.00 0 0.50 0.30 3.00 mStone nm:"Pillar"
-		bx 0.50 0.05 0 1.90 0.20 0.05 mAlu nm:"Door_Sill"
-		slats 0.52 1.88 0.08 0.16 0.05 2.40 0.09 0.025 mWood "Ped_Door_Slat"
-		bx 0.50 0.04 2.40 1.90 0.20 2.50 mAlu nm:"Door_Head"
-		for hx in #(1.62, 1.72) do bx hx 0.02 0.90 (hx+0.03) 0.08 1.90 mAlu nm:"Door_Handle"
-		bx 1.90 0.00 0 5.40 0.30 2.50 mStone nm:"Name_Wall"
-		for gx in #(2.60, 3.30, 4.00, 4.70) do bx gx (-0.004) 0.05 (gx+0.015) 0.0 2.45 mGroove nm:"Wall_Groove"
-		signText ("Villa 0" + (idx as string)) 4.40 2.05 0.0 0.30 0.012 mSign "Villa_Sign"
-		slats 5.42 9.88 0.08 0.16 0.05 2.40 0.10 0.025 mWood "Car_Gate_Slat"
-		bx 5.40 0.04 2.40 9.90 0.20 2.50 mAlu nm:"Gate_Head"
-		bx 9.90 0.00 0 10.40 0.30 2.60 mStone nm:"Pillar_Shared"
-		bx (-0.30) (-0.60) 2.95 5.60 1.20 3.20 mWhite nm:"Entrance_Canopy"
-		bx 5.30 0.00 0 5.60 0.30 2.95 mWhite nm:"Canopy_Post"
-		bx 9.95 0.30 0 10.35 plotD 2.40 mPlaster nm:"Side_Wall"
+		-- ---------- boundary wall ----------
+		bx 0.00 0.00 0 0.50 0.35 2.70 mStone nm:"Pillar"
+		bx 0.50 0.05 0 1.00 0.30 2.50 mStone nm:"Wall_Sconce"
+		-- teak pedestrian door 1.20 x 2.40 with two black pull bars
+		bx 1.00 0.10 0 2.20 0.25 0.03 mAlu nm:"Door_Sill"
+		slats 1.02 2.18 0.10 0.18 0.03 2.40 0.085 0.022 mWood "Ped_Door_Slat"
+		bx 1.00 0.08 2.40 2.20 0.25 2.50 mAlu nm:"Door_Head"
+		for hx in #(1.86, 1.96) do (
+			bx hx 0.03 0.75 (hx+0.025) 0.10 1.95 mAlu nm:"Door_PullBar"
+			bx hx 0.08 0.80 (hx+0.025) 0.10 0.83 mAlu nm:"PullBar_Stand"
+			bx hx 0.08 1.87 (hx+0.025) 0.10 1.90 mAlu nm:"PullBar_Stand"
+		)
+		-- white name panel 2.70 x 2.60 with 3 joints and the sign
+		bx 2.20 0.00 0 4.90 0.30 2.60 mPanel nm:"Name_Panel"
+		for gx in #(2.88, 3.55, 4.22) do bx gx (-0.004) 0.04 (gx+0.012) 0.0 2.56 mGroove nm:"Panel_Joint"
+		signText ("Villa 0" + (idx as string)) 4.05 2.15 0.0 0.30 0.012 mSign "Villa_Sign"
+		-- white post + canopy over door and panel (Pi-frame)
+		bx 4.90 0.00 0 5.20 0.35 3.15 mWhite nm:"Canopy_Post"
+		bx 0.25 0.00 2.50 0.55 0.35 3.15 mWhite nm:"Canopy_Post_L"
+		bx 0.25 (-0.45) 2.90 5.20 1.60 3.15 mWhite nm:"Entrance_Canopy"
+		-- teak car gate 3.20 x 2.40
+		slats 5.22 8.38 0.10 0.18 0.03 2.40 0.10 0.022 mWood "Car_Gate_Slat"
+		bx 5.20 0.08 2.40 8.40 0.25 2.50 mAlu nm:"Gate_Head"
+		bx 5.20 0.08 0.00 8.40 0.25 0.03 mAlu nm:"Gate_Track"
+		bx 8.40 0.05 0 plotW 0.30 2.50 mStone nm:"Wall_End"
+		bx (plotW-0.30) 0.30 0 plotW plotD 2.40 mPlaster nm:"Side_Wall"
+		-- kerb strip in front of the wall
+		bx 0.00 (-0.06) 0 plotW 0.0 0.06 mGroove nm:"Wall_Plinth"
 
 		-- ---------- landscape ----------
-		bx (-0.10) (-1.00) 0 1.20 (-0.15) 0.55 mStone nm:"Planter"
-		bx (-0.05) (-0.95) 0.55 1.15 (-0.20) 0.57 mSoil nm:"Planter_Soil"
-		shrub 0.55 (-0.58) 0.57 0.42 mPlant
-		ball 0.30 (-0.40) 1.55 0.30 mPlant nm:"Shrub"
-		bx 2.00 (-0.45) 0 5.30 (-0.02) 0.12 mStone nm:"Flower_Bed"
-		for i = 1 to 30 do (
+		bx (-0.15) (-0.85) 0 0.75 (-0.10) 0.48 mStone nm:"Planter"
+		bx (-0.10) (-0.80) 0.48 0.70 (-0.15) 0.50 mSoil nm:"Planter_Soil"
+		cyl 0.30 (-0.48) 0.50 0.03 0.70 mTrunk nm:"Planter_Tree_Trunk" sides:8
+		for i = 1 to 7 do ball (0.30 + random (-0.30) 0.30) (-0.48 + random (-0.20) 0.20) (random 1.00 1.75) (random 0.18 0.28) mPlant nm:"Planter_Tree"
+		bx 2.30 (-0.40) 0 4.80 (-0.02) 0.10 mStone nm:"Flower_Bed"
+		for i = 1 to 34 do (
 			local m = case ((mod i 3) as integer) of (0: mFlowerP; 1: mFlowerY; default: mFlowerR)
-			ball (random 2.10 5.20) (random (-0.40) (-0.08)) (random 0.15 0.24) (random 0.06 0.10) m nm:"Flower"
+			ball (random 2.40 4.70) (random (-0.36) (-0.06)) (random 0.13 0.22) (random 0.05 0.09) m nm:"Flower"
 		)
-		for i = 1 to 10 do ball (random 2.10 5.20) (random (-0.40) (-0.08)) 0.12 (random 0.08 0.12) mPlant nm:"Bed_Leaf"
-		-- shrubs peeking over the wall + tree in the front yard
-		shrub 3.00 1.20 1.80 0.55 mPlant
-		shrub 8.80 1.40 1.90 0.60 mPlant
+		for i = 1 to 12 do ball (random 2.40 4.70) (random (-0.36) (-0.06)) 0.10 (random 0.07 0.11) mPlant nm:"Bed_Leaf"
+		shrub 2.90 1.30 2.00 0.45 mPlant
+		shrub 7.90 1.40 1.95 0.55 mPlant
 
-		-- ---------- house ----------
-		bx 0.80 4.00 0 9.60 (plotD-1.0) gf mPlaster nm:"GF_Body"
-		-- GF glazing: lit interior wall + glass in front
-		bx 1.40 3.985 0.10 4.20 4.00 2.90 mInterior nm:"GF_Interior_Glow"
-		bx 1.40 3.96 0.10 4.20 3.975 2.90 mGlass nm:"GF_Glass"
-		bx 5.00 3.98 0.00 6.40 4.00 2.60 mWood nm:"GF_Entry_Door"
-		bx 0.50 3.10 gf 9.60 (plotD-1.0) (gf+0.25) mWhite nm:"FF_Slab"
-		bx 0.80 3.10 (gf-0.02) 9.60 3.18 gf mLED nm:"Cantilever_LED"
-		bx 0.50 3.00 0 1.30 (plotD-1.0) (roofZ+1.20) mTaupeDk nm:"Side_Fin"
-		-- recessed glass bay with a real lit room behind
-		bx 1.30 4.00 (gf+0.25) 4.20 4.03 (roofZ-0.15) mGlass nm:"FF_Glass"
-		for mx in #(1.30, 2.25, 3.20, 4.12) do bx mx 3.96 (gf+0.25) (mx+0.08) 4.04 (roofZ-0.15) mAlu nm:"Mullion"
-		bx 1.30 3.96 (gf+2.20) 4.20 4.04 (gf+2.28) mAlu nm:"Transom"
-		bx 2.70 4.15 (gf+0.30) 4.15 4.20 (roofZ-0.25) mCurtain nm:"Sheer_Curtain"
-		bx 1.30 7.80 (gf+0.25) 4.20 8.00 (roofZ-0.15) mInterior nm:"Room_BackWall"
-		bx 1.30 4.03 (roofZ-0.30) 4.20 8.00 (roofZ-0.15) mPlaster nm:"Room_Ceiling"
-		bx 2.40 5.80 (roofZ-0.32) 3.10 6.20 (roofZ-0.30) mLED nm:"Room_Ceiling_Light"
-		pointL 2.75 6.00 (roofZ-0.60) 250 3000 "Room_Light"
-		bx 1.30 3.10 (gf+0.25) 4.20 3.14 (gf+1.25) mRail nm:"Balcony_Glass"
-		bx 1.30 3.08 (gf+1.25) 4.20 3.16 (gf+1.29) mAlu nm:"Balcony_Rail"
-		bx 1.30 4.00 (roofZ-0.15) 4.20 (plotD-1.0) roofZ mTaupe nm:"FF_Bay_Head"
-		bx 1.30 8.00 (gf+0.25) 4.20 (plotD-1.0) (roofZ-0.15) mTaupe nm:"FF_Bay_Back"
-		-- solid box with backlit teak louvers + panel joints
-		bx 4.20 3.20 (gf+0.25) 9.60 (plotD-1.0) roofZ mTaupe nm:"FF_Box"
-		bx 4.40 3.195 (gf+0.40) 6.40 3.20 (roofZ-0.10) mInterior nm:"Louver_Backlight"
-		slats 4.40 6.40 3.02 3.19 (gf+0.40) (roofZ-0.10) 0.06 0.07 mWood "Louver"
-		for gz in #(gf+1.40, gf+2.40) do bx 6.40 3.196 gz 9.60 3.20 (gz+0.015) mGroove nm:"Panel_Groove"
-		for gx in #(7.50, 8.55) do bx gx 3.196 (gf+0.25) (gx+0.015) 3.20 roofZ mGroove nm:"Panel_Groove"
-		bx 0.50 3.00 roofZ 9.60 (plotD-1.0) (roofZ+0.30) mTaupe nm:"Parapet"
-		bx 1.60 6.50 roofZ 4.00 10.00 (roofZ+2.40) mWhite nm:"Roof_Stair_Box"
-		bx 1.50 6.40 (roofZ+2.40) 4.10 10.10 (roofZ+2.55) mTaupe nm:"Roof_Stair_Cap"
-		bx 2.30 6.48 (roofZ+0.90) 3.30 6.50 (roofZ+2.00) mInterior nm:"Stair_Window_Glow"
+		-- ---------- house: ground floor ----------
+		bx 0.60 4.00 0 (plotW-0.30) (plotD-1.0) gf mPlaster nm:"GF_Body"
+		bx 1.30 3.985 0.10 3.70 4.00 2.80 mInterior nm:"GF_Interior_Glow"
+		bx 1.30 3.96 0.10 3.70 3.975 2.80 mGlass nm:"GF_Glass"
+		for mx in #(1.30, 2.47, 3.64) do bx mx 3.94 0.10 (mx+0.06) 3.98 2.80 mAlu nm:"GF_Mullion"
+		bx 5.80 3.98 0.00 7.00 4.00 2.60 mWood nm:"GF_Entry_Door"
+		bx 5.70 3.96 2.60 7.10 4.00 2.68 mAlu nm:"GF_Door_Frame"
+
+		-- ---------- first floor ----------
+		bx 0.60 3.00 gf (plotW-0.30) (plotD-1.0) (gf+0.25) mWhite nm:"FF_Slab_WhiteBand"
+		bx 0.80 3.00 (gf-0.02) (plotW-0.30) 3.08 gf mLED nm:"Cantilever_LED"
+		-- dark taupe side fin, taller than the parapet
+		bx 0.60 2.90 gf 1.20 (plotD-1.0) (roofZ+0.90) mTaupeDk nm:"Side_Fin"
+		-- recessed glazed bay: 2 tall panes + transom, sheer curtain, lit room
+		bx 1.20 4.00 (gf+0.25) 3.80 4.03 (roofZ-0.10) mGlass nm:"FF_Glass"
+		for mx in #(1.20, 2.47, 3.74) do bx mx 3.95 (gf+0.25) (mx+0.06) 4.03 (roofZ-0.10) mAlu nm:"FF_Mullion"
+		bx 1.20 3.95 (roofZ-0.90) 3.80 4.03 (roofZ-0.84) mAlu nm:"FF_Transom"
+		bx 1.20 3.95 (roofZ-0.16) 3.80 4.03 (roofZ-0.10) mAlu nm:"FF_Head"
+		bx 2.55 4.12 (gf+0.30) 3.70 4.16 (roofZ-0.95) mCurtain nm:"Sheer_Curtain"
+		bx 1.20 7.80 (gf+0.25) 3.80 8.00 roofZ mInterior nm:"Room_BackWall"
+		bx 1.20 4.03 (roofZ-0.10) 3.80 8.00 roofZ mPlaster nm:"Room_Ceiling"
+		bx 2.20 5.80 (roofZ-0.12) 2.80 6.20 (roofZ-0.10) mLED nm:"Room_Ceiling_Light"
+		pointL 2.50 6.00 (roofZ-0.50) 250 3000 "Room_Light"
+		bx 1.20 4.03 (gf+0.25) 1.25 7.80 roofZ mPlaster nm:"Room_SideWall"
+		-- balcony: white slab + glass + dark top rail
+		bx 1.20 3.00 (gf-0.05) 3.80 4.00 (gf+0.25) mWhite nm:"Balcony_Slab"
+		bx 1.22 3.02 (gf+0.25) 3.78 3.05 (gf+1.25) mRail nm:"Balcony_Glass"
+		bx 1.20 3.00 (gf+1.25) 3.80 3.07 (gf+1.29) mAlu nm:"Balcony_TopRail"
+		for px in #(1.22, 3.74) do bx px 3.00 (gf+0.25) (px+0.04) 3.07 (gf+1.25) mAlu nm:"Balcony_Post"
+		bx 1.20 4.03 roofZ 3.80 (plotD-1.0) (roofZ+0.30) mTaupe nm:"FF_Bay_Top"
+		bx 1.20 8.00 (gf+0.25) 3.80 (plotD-1.0) roofZ mTaupe nm:"FF_Bay_Back"
+		-- taupe box with full-height dark teak louvers + panel joints
+		bx 3.80 3.20 (gf+0.25) (plotW-0.30) (plotD-1.0) roofZ mTaupe nm:"FF_Box"
+		bx 3.90 3.195 (gf+0.30) 5.60 3.20 (roofZ-0.05) mInterior nm:"Louver_Backlight"
+		slats 3.90 5.60 3.02 3.19 (gf+0.30) (roofZ-0.05) 0.05 0.055 mLouver "Louver"
+		bx 3.85 3.00 (gf+0.25) 5.65 3.20 (gf+0.30) mAlu nm:"Louver_Frame"
+		bx 3.85 3.00 (roofZ-0.05) 5.65 3.20 roofZ mAlu nm:"Louver_Frame"
+		bx 7.40 3.196 (gf+0.25) 7.412 3.20 (roofZ+0.30) mGroove nm:"Panel_Joint"
+		bx 5.60 3.196 (gf+1.75) (plotW-0.30) 3.20 (gf+1.762) mGroove nm:"Panel_Joint"
+		-- parapet + roof stair box
+		bx 3.80 3.20 roofZ (plotW-0.30) (plotD-1.0) (roofZ+0.30) mTaupe nm:"Parapet"
+		bx 2.20 5.50 (roofZ+0.30) 3.60 7.50 (roofZ+1.00) mWhite nm:"Roof_Stair_Box"
+		bx 2.10 5.40 (roofZ+1.00) 3.70 7.60 (roofZ+1.08) mTaupe nm:"Roof_Stair_Cap"
 
 		-- ---------- night lights ----------
-		-- pillar sconce (glow + up/down wash)
-		bx 0.15 (-0.10) 2.30 0.35 0.0 2.70 mAlu nm:"Sconce_Body"
-		bx 0.18 (-0.105) 2.32 0.32 (-0.10) 2.68 mLamp nm:"Sconce_Glow"
-		spot 0.25 (-0.15) 2.30 0.25 (-0.20) 0.0 350 3000 40 90 "Sconce_Down"
-		spot 0.25 (-0.15) 2.70 0.25 (-0.20) 4.0 250 3000 30 80 "Sconce_Up"
-		bx 10.05 (-0.10) 2.10 10.25 0.0 2.40 mAlu nm:"Sconce_Body"
-		bx 10.08 (-0.105) 2.12 10.22 (-0.10) 2.38 mLamp nm:"Sconce_Glow"
-		spot 10.15 (-0.15) 2.10 10.15 (-0.20) 0.0 300 3000 40 90 "Sconce_Down"
-		-- canopy LED strip + downlights
-		bx (-0.25) (-0.55) 2.93 5.55 (-0.50) 2.95 mLED nm:"Canopy_LED"
-		spot 1.20 (-0.20) 2.90 1.20 (-0.20) 0.0 450 3000 50 100 "Canopy_Downlight"
-		spot 3.60 (-0.20) 2.90 3.60 (-0.20) 0.0 450 3000 50 100 "Canopy_Downlight"
-		-- uplights washing the name wall
-		spot 2.80 (-0.35) 0.10 2.80 0.0 2.50 220 3000 20 50 "Wall_Uplight"
-		spot 4.60 (-0.35) 0.10 4.60 0.0 2.50 220 3000 20 50 "Wall_Uplight"
-		-- uplight on the side fin + soft light behind the gate
-		spot 0.90 2.70 0.10 0.90 3.00 (roofZ+1.0) 400 3000 15 40 "Fin_Uplight"
-		pointL 6.00 2.00 2.20 120 3000 "Yard_Glow"
+		-- wall sconce (glow + up/down wash), 2700K
+		bx 0.65 (-0.10) 2.00 0.85 0.05 2.35 mAlu nm:"Sconce_Body"
+		bx 0.68 (-0.105) 2.02 0.82 (-0.10) 2.33 mLamp nm:"Sconce_Glow"
+		spot 0.75 (-0.15) 2.00 0.75 (-0.20) 0.0 350 2700 35 85 "Sconce_Down"
+		spot 0.75 (-0.15) 2.35 0.75 (-0.20) 4.5 250 2700 25 70 "Sconce_Up"
+		-- canopy soffit LED line + 2 downlights over door / panel
+		bx 0.30 (-0.40) 2.88 5.15 (-0.35) 2.90 mLED nm:"Canopy_LED"
+		spot 1.60 (-0.10) 2.88 1.60 (-0.10) 0.0 450 3000 45 95 "Canopy_Downlight"
+		spot 3.50 (-0.10) 2.88 3.50 (-0.10) 0.0 450 3000 45 95 "Canopy_Downlight"
+		-- uplights in the flower bed washing the name panel
+		spot 2.80 (-0.30) 0.08 2.80 0.0 2.60 200 3000 18 45 "Panel_Uplight"
+		spot 4.40 (-0.30) 0.08 4.40 0.0 2.60 200 3000 18 45 "Panel_Uplight"
+		-- tree uplight in the planter
+		spot 0.30 (-0.70) 0.50 0.30 (-0.48) 2.00 150 3000 30 70 "Tree_Uplight"
+		-- grazing light up the louvers + up the side fin
+		spot 4.75 2.90 (gf+0.30) 4.75 3.10 (roofZ+0.5) 600 3000 25 60 "Louver_Graze"
+		spot 0.90 2.70 (gf+0.30) 0.90 2.90 (roofZ+1.0) 350 3000 15 40 "Fin_Graze"
+		-- balcony soffit + yard glow behind the wall
+		spot 2.50 3.50 (gf-0.06) 2.50 3.50 0.0 300 3000 50 100 "Balcony_Downlight"
+		pointL 6.80 2.00 2.20 120 3000 "Yard_Glow"
 	)
 
 	-- ==================================================================
@@ -411,7 +442,7 @@
 			palm (-5.5) 1.5 6.5
 			palm (-12.0) 2.5 7.5
 			palm (-16.0) (-0.8) 9.0
-			for sx in #(-3.0, 18.0, 39.0) do streetLight sx (-1.5)
+			for sx in #(-3.0, 16.0, 35.0) do streetLight sx (-1.5)
 
 			-- night sky dome
 			local dome = Sphere radius:(mU 400) segs:32
@@ -426,28 +457,28 @@
 			curNodes = #()
 			car 1.5 (-10.0) 180 mCarGold "Car_01_Champagne"
 			curNodes = #()
-			car 24.0 (-6.5) 0 mCarGrey "Car_02_Graphite"
+			car 22.0 (-6.5) 0 mCarGrey "Car_02_Graphite"
 
 			-- people
 			useLayer "Villas_People"
 			curNodes = #()
-			person 12.0 (-0.9) 180 mShirtW false "Person_01_Man"
+			person 11.0 (-0.9) 180 mShirtW false "Person_01_Man"
 			curNodes = #()
-			person 12.6 (-1.1) 175 mAbaya true "Person_02_Woman"
+			person 11.6 (-1.1) 175 mAbaya true "Person_02_Woman"
 			curNodes = #()
-			person 33.6 (-0.6) 95 mShirtB false "Person_03_Man_AtGate"
+			person 35.3 (-0.6) 95 mShirtB false "Person_03_Man_AtGate"
 			curNodes = #()
 			person (-2.5) (-0.9) 10 mAbaya true "Person_04_Woman"
 
 			-- physical camera, like the street render
 			useLayer "Villas_Camera"
 			curNodes = #()
-			local tgt = Targetobject pos:(p3 22.0 4.0 3.5)
+			local tgt = Targetobject pos:(p3 19.0 4.0 3.2)
 			local cam = undefined
-			try (cam = Physical targeted:true pos:(p3 (-7.0) (-13.0) 1.6) target:tgt) catch ()
-			if cam == undefined do cam = Targetcamera fov:62 pos:(p3 (-7.0) (-13.0) 1.6) target:tgt
+			try (cam = Physical targeted:true pos:(p3 (-6.0) (-12.5) 1.5) target:tgt) catch ()
+			if cam == undefined do cam = Targetcamera fov:62 pos:(p3 (-6.0) (-12.5) 1.5) target:tgt
 			try (cam.specify_fov = false; cam.focal_length_mm = 24.0) catch ()
-			try (cam.exposure_gain_type = 1; cam.exposure_value = 3.5) catch ()
+			try (cam.exposure_gain_type = 1; cam.exposure_value = 4.0) catch ()
 			try (cam.vignetting_enabled = true; cam.vignetting_amount = 0.6) catch ()
 			cam.name = uniqueName "Cam_Villas_Night"
 			tgt.name = cam.name + ".Target"
