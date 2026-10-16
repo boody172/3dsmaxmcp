@@ -88,6 +88,8 @@
 	local mPlaster = noiseBump (mkMat "Villa_Plaster_Light" (color 214 204 192) 0.85 0.0) 0.01 0.10
 	local mWhite   = mkMat "Villa_White" (color 238 236 230) 0.70 0.0
 	local mWood    = woodGrain (mkMat "Villa_Wood_Teak_Gate" (color 138 98 64) 0.50 0.0) (color 148 106 68) (color 110 76 48)
+	local mEntryDoor = woodGrain (mkMat "Villa_EntryDoor_Walnut" (color 92 62 42) 0.40 0.0) (color 100 68 46) (color 70 46 30)
+	local mDrive  = noiseBump (mkMat "Driveway_Interlock_Grey" (color 150 146 140) 0.75 0.0) 0.02 0.3
 	local mLouver  = woodGrain (mkMat "Villa_Louver_DarkWood" (color 96 72 54) 0.45 0.0) (color 104 78 58) (color 78 58 42)
 	local mAlu     = mkMat "Villa_Alu_DarkGrey" (color 48 48 50) 0.35 0.85
 	local mGlass   = mkGlass "Villa_Glass" (color 120 140 150) 0.80
@@ -308,10 +310,21 @@
 		bx 4.90 0.00 0 5.20 0.35 3.15 mWhite nm:"Canopy_Post"
 		bx 0.25 0.00 2.50 0.55 0.35 3.15 mWhite nm:"Canopy_Post_L"
 		bx 0.25 (-0.45) 2.90 5.20 1.60 3.15 mWhite nm:"Entrance_Canopy"
-		-- teak car gate 3.20 x 2.40
-		slats 5.22 8.38 0.10 0.18 0.03 2.40 0.10 0.022 mWood "Car_Gate_Slat"
-		bx 5.20 0.08 2.40 8.40 0.25 2.50 mAlu nm:"Gate_Head"
-		bx 5.20 0.08 0.00 8.40 0.25 0.03 mAlu nm:"Gate_Track"
+		-- GARAGE / CAR GATE 3.20 x 2.40: teak slats in a black steel frame,
+		-- 2 sliding leaves, recessed 10 cm behind the wall face
+		bx 5.20 0.10 0.00 5.26 0.26 2.45 mAlu nm:"Gate_Frame"
+		bx 8.34 0.10 0.00 8.40 0.26 2.45 mAlu nm:"Gate_Frame"
+		bx 6.77 0.10 0.00 6.83 0.26 2.45 mAlu nm:"Gate_Frame_Mid"
+		bx 5.20 0.10 2.40 8.40 0.26 2.50 mAlu nm:"Gate_Head"
+		bx 5.20 0.10 0.00 8.40 0.26 0.06 mAlu nm:"Gate_Track"
+		slats 5.28 6.75 0.12 0.20 0.06 2.40 0.10 0.022 mWood "Car_Gate_Slat"
+		slats 6.85 8.32 0.12 0.20 0.06 2.40 0.10 0.022 mWood "Car_Gate_Slat"
+		for hz in #(0.45, 1.95) do bx 5.26 0.20 hz 8.34 0.24 (hz+0.06) mAlu nm:"Gate_Rail_Back"
+		bx 6.62 0.07 0.95 6.645 0.12 1.55 mAlu nm:"Gate_Handle"
+		bx 6.955 0.07 0.95 6.98 0.12 1.55 mAlu nm:"Gate_Handle"
+		-- driveway: paved apron + lowered kerb in front of the garage gate
+		bx 5.20 (-1.75) 0.12 8.40 0.10 0.125 mDrive nm:"Driveway_Apron"
+		bx 5.20 4.00 0 8.40 0.30 0.02 mDrive nm:"Driveway_Inside"
 		bx 8.40 0.05 0 plotW 0.30 2.50 mStone nm:"Wall_End"
 		bx (plotW-0.30) 0.30 0 plotW plotD 2.40 mPlaster nm:"Side_Wall"
 		-- kerb strip in front of the wall
@@ -333,11 +346,29 @@
 
 		-- ---------- house: ground floor ----------
 		bx 0.60 4.00 0 (plotW-0.30) (plotD-1.0) gf mPlaster nm:"GF_Body"
-		bx 1.30 3.985 0.10 3.70 4.00 2.80 mInterior nm:"GF_Interior_Glow"
-		bx 1.30 3.96 0.10 3.70 3.975 2.80 mGlass nm:"GF_Glass"
-		for mx in #(1.30, 2.47, 3.64) do bx mx 3.94 0.10 (mx+0.06) 3.98 2.80 mAlu nm:"GF_Mullion"
-		bx 5.80 3.98 0.00 7.00 4.00 2.60 mWood nm:"GF_Entry_Door"
-		bx 5.70 3.96 2.60 7.10 4.00 2.68 mAlu nm:"GF_Door_Frame"
+		-- MAIN ENTRANCE: 1.20 x 2.80 walnut pivot door, vertical grooves,
+		-- 1.40 m black pull bar, glass sidelight, stone step + downlight
+		bx 1.20 3.90 0.00 2.60 4.00 2.95 mAlu nm:"Entry_Frame"
+		bx 1.25 3.86 0.15 2.45 3.92 2.90 mEntryDoor nm:"Entry_Door_Leaf"
+		for gx in #(1.45, 1.65, 1.85, 2.05) do bx gx 3.855 0.20 (gx+0.01) 3.86 2.85 mGroove nm:"Entry_Door_Groove"
+		bx 2.25 3.80 0.80 2.28 3.84 2.20 mAlu nm:"Entry_PullBar"
+		bx 2.25 3.84 0.85 2.28 3.86 0.88 mAlu nm:"Entry_PullBar_Stand"
+		bx 2.25 3.84 2.12 2.28 3.86 2.15 mAlu nm:"Entry_PullBar_Stand"
+		bx 2.47 3.90 0.15 2.58 3.98 2.90 mInterior nm:"Entry_Sidelight_Glow"
+		bx 2.47 3.88 0.15 2.58 3.90 2.90 mGlass nm:"Entry_Sidelight"
+		bx 1.00 3.20 0.00 2.80 3.90 0.15 mStone nm:"Entry_Step"
+		bx 1.70 3.50 (gf-0.02) 1.90 3.70 gf mLamp nm:"Entry_Downlight_Glow"
+		spot 1.80 3.60 (gf-0.03) 1.80 3.60 0.0 400 3000 40 90 "Entry_Downlight"
+		-- GF window (lit)
+		bx 2.90 3.985 0.60 4.70 4.00 2.80 mInterior nm:"GF_Interior_Glow"
+		bx 2.90 3.96 0.60 4.70 3.975 2.80 mGlass nm:"GF_Glass"
+		for mx in #(2.90, 3.77, 4.64) do bx mx 3.94 0.60 (mx+0.06) 3.98 2.80 mAlu nm:"GF_Mullion"
+		-- GARAGE DOOR (house): 3.00 x 2.50 sectional, teak-look panels
+		bx 5.25 3.95 0.00 8.35 4.00 2.65 mAlu nm:"Garage_Frame"
+		for i = 0 to 4 do bx 5.35 3.90 (0.02 + i*0.50) 8.25 3.95 (0.50 + i*0.50) mWood nm:"Garage_Panel"
+		for i = 1 to 4 do bx 5.35 3.885 (i*0.50) 8.25 3.90 (0.02 + i*0.50) mAlu nm:"Garage_Panel_Joint"
+		bx 6.70 3.86 2.66 6.90 3.95 2.72 mLamp nm:"Garage_Light_Glow"
+		spot 6.80 3.80 2.66 6.80 2.80 0.0 300 3000 50 110 "Garage_Light"
 
 		-- ---------- first floor ----------
 		bx 0.60 3.00 gf (plotW-0.30) (plotD-1.0) (gf+0.25) mWhite nm:"FF_Slab_WhiteBand"
